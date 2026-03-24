@@ -1,0 +1,354 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>جدول فل بدي — تضخيم 5 أيام</title>
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800;900&family=Tajawal:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #f6f5f0;
+  --bg-card: #ffffff;
+  --bg-row-odd: #fafaf7;
+  --bg-row-even: #ffffff;
+  --accent: #2d6a4f;
+  --accent-light: #40916c;
+  --accent-bg: rgba(45,106,79,0.06);
+  --accent-border: rgba(45,106,79,0.15);
+  --rpe-color: #c44536;
+  --rpe-bg: rgba(196,69,54,0.07);
+  --rpe-border: rgba(196,69,54,0.15);
+  --text: #1a1a2e;
+  --text-secondary: #5a5a72;
+  --text-dim: #8a8a9a;
+  --border: #e8e6df;
+  --border-light: #f0eee8;
+  --shadow: 0 1px 3px rgba(0,0,0,0.04), 0 4px 12px rgba(0,0,0,0.03);
+  --shadow-hover: 0 2px 8px rgba(0,0,0,0.06), 0 8px 24px rgba(0,0,0,0.05);
+  --radius: 14px;
+  --yt-red: #ff0000;
+}
+* { margin:0; padding:0; box-sizing:border-box; }
+body { font-family:'Cairo','Tajawal',sans-serif; background:var(--bg); color:var(--text); min-height:100vh; -webkit-font-smoothing:antialiased; }
+.container { max-width:960px; margin:0 auto; padding:24px 16px 60px; }
+
+.main-header { text-align:center; padding:36px 20px 28px; margin-bottom:8px; }
+.main-header h1 { font-size:2.2rem; font-weight:900; color:var(--accent); letter-spacing:-0.5px; margin-bottom:6px; }
+.main-header .subtitle { font-size:0.95rem; color:var(--text-secondary); font-weight:400; line-height:1.7; }
+.badge-row { display:flex; gap:8px; justify-content:center; flex-wrap:wrap; margin-top:14px; }
+.info-badge { display:inline-flex; align-items:center; gap:5px; padding:5px 14px; border-radius:20px; font-size:0.8rem; font-weight:600; background:var(--accent-bg); color:var(--accent); border:1px solid var(--accent-border); }
+
+.save-toast { position:fixed; bottom:20px; left:50%; transform:translateX(-50%) translateY(80px); background:var(--accent); color:#fff; padding:10px 24px; border-radius:30px; font-size:0.85rem; font-weight:700; box-shadow:0 4px 16px rgba(45,106,79,0.3); z-index:999; transition:transform 0.3s ease; pointer-events:none; }
+.save-toast.show { transform:translateX(-50%) translateY(0); }
+
+.tip-banner { background:var(--bg-card); border:1px solid var(--border); border-radius:var(--radius); padding:14px 18px; margin-bottom:24px; font-size:0.85rem; color:var(--text-secondary); line-height:1.9; box-shadow:var(--shadow); }
+.tip-banner strong { color:var(--accent); }
+
+.tabs-wrapper { position:sticky; top:0; z-index:10; background:var(--bg); padding:10px 0; }
+.tabs { display:flex; gap:6px; justify-content:center; flex-wrap:wrap; }
+.tab-btn { background:var(--bg-card); border:1.5px solid var(--border); color:var(--text-secondary); padding:10px 22px; border-radius:50px; font-family:inherit; font-size:0.9rem; font-weight:700; cursor:pointer; transition:all 0.25s ease; }
+.tab-btn:hover { border-color:var(--accent-light); color:var(--accent); transform:translateY(-1px); box-shadow:var(--shadow); }
+.tab-btn.active { background:var(--accent); border-color:var(--accent); color:#fff; box-shadow:0 2px 10px rgba(45,106,79,0.25); }
+.tab-btn.stats-tab { background:rgba(196,69,54,0.06); border-color:rgba(196,69,54,0.2); color:var(--rpe-color); }
+.tab-btn.stats-tab.active { background:var(--rpe-color); border-color:var(--rpe-color); color:#fff; }
+
+.day-content { display:none; animation:fadeUp 0.35s ease; }
+.day-content.active { display:block; }
+@keyframes fadeUp { from{opacity:0;transform:translateY(10px)} to{opacity:1;transform:translateY(0)} }
+
+.day-title { text-align:center; margin-bottom:20px; }
+.day-title h2 { font-size:1.4rem; font-weight:800; color:var(--text); }
+.day-title .focus { font-size:0.88rem; color:var(--accent-light); margin-top:2px; font-weight:600; }
+.muscle-tags { display:flex; gap:6px; justify-content:center; flex-wrap:wrap; margin-bottom:18px; }
+.muscle-tag { padding:3px 12px; border-radius:16px; font-size:0.75rem; font-weight:600; background:#eef6f1; color:var(--accent); border:1px solid rgba(45,106,79,0.12); }
+
+.exercise-block { background:var(--bg-card); border:1px solid var(--border); border-radius:var(--radius); margin-bottom:14px; overflow:hidden; box-shadow:var(--shadow); transition:box-shadow 0.25s,border-color 0.25s; }
+.exercise-block:hover { box-shadow:var(--shadow-hover); border-color:var(--accent-border); }
+
+.exercise-top { display:flex; gap:14px; padding:14px 18px; border-bottom:1px solid var(--border-light); align-items:center; }
+.exercise-gif-wrap { width:90px; height:90px; border-radius:10px; overflow:hidden; flex-shrink:0; background:var(--bg-row-odd); border:1px solid var(--border); position:relative; cursor:pointer; }
+.exercise-gif-wrap img { width:100%; height:100%; object-fit:cover; }
+.exercise-gif-wrap .gif-overlay { position:absolute; inset:0; display:flex; align-items:center; justify-content:center; background:rgba(0,0,0,0.2); opacity:0; transition:opacity 0.2s; border-radius:10px; }
+.exercise-gif-wrap:hover .gif-overlay { opacity:1; }
+.gif-overlay svg { width:28px; height:28px; fill:#fff; filter:drop-shadow(0 1px 3px rgba(0,0,0,0.3)); }
+
+.exercise-info { flex:1; min-width:0; }
+.exercise-name-link { display:inline-flex; align-items:center; gap:6px; text-decoration:none; color:var(--text); font-size:1.05rem; font-weight:700; transition:color 0.2s; }
+.exercise-name-link:hover { color:var(--accent); }
+.yt-icon { width:18px; height:18px; background:var(--yt-red); border-radius:3px; display:inline-flex; align-items:center; justify-content:center; flex-shrink:0; }
+.yt-icon svg { width:10px; height:10px; fill:white; }
+.exercise-en { font-size:0.78rem; color:var(--text-dim); font-weight:400; margin-top:2px; }
+.exercise-meta { display:flex; gap:8px; align-items:center; flex-wrap:wrap; margin-top:6px; }
+.meta-badge { padding:3px 10px; border-radius:16px; font-size:0.75rem; font-weight:600; background:var(--accent-bg); color:var(--accent); border:1px solid var(--accent-border); }
+.meta-badge.rpe { background:var(--rpe-bg); color:var(--rpe-color); border-color:var(--rpe-border); }
+
+.sets-table { width:100%; border-collapse:collapse; }
+.sets-table thead th { padding:10px 14px; font-size:0.78rem; font-weight:700; color:var(--accent); background:var(--accent-bg); border-bottom:1px solid var(--border-light); text-align:center; }
+.sets-table tbody tr { border-bottom:1px solid var(--border-light); transition:background 0.15s; }
+.sets-table tbody tr:nth-child(odd) { background:var(--bg-row-odd); }
+.sets-table tbody tr:nth-child(even) { background:var(--bg-row-even); }
+.sets-table tbody tr:hover { background:rgba(45,106,79,0.03); }
+.sets-table td { padding:8px 14px; text-align:center; font-size:0.9rem; }
+.set-label { font-weight:700; color:var(--accent-light); font-size:0.82rem; }
+.sets-table input[type="number"] { width:56px; background:var(--bg); border:1px solid var(--border); border-radius:8px; color:var(--text); font-family:inherit; font-size:0.9rem; font-weight:600; padding:5px 4px; text-align:center; transition:border-color 0.2s,box-shadow 0.2s; -moz-appearance:textfield; }
+.sets-table input::-webkit-inner-spin-button,.sets-table input::-webkit-outer-spin-button { -webkit-appearance:none; }
+.sets-table input:focus { outline:none; border-color:var(--accent); box-shadow:0 0 0 3px rgba(45,106,79,0.1); }
+.rest-note { text-align:center; padding:8px; font-size:0.8rem; color:var(--text-dim); border-top:1px solid var(--border-light); }
+
+/* GIF MODAL */
+.gif-modal-overlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.55); z-index:1000; align-items:center; justify-content:center; padding:20px; }
+.gif-modal-overlay.show { display:flex; }
+.gif-modal { background:var(--bg-card); border-radius:var(--radius); max-width:420px; width:100%; overflow:hidden; box-shadow:0 10px 40px rgba(0,0,0,0.2); position:relative; }
+.gif-modal img { width:100%; display:block; }
+.gif-modal-footer { padding:12px 16px; text-align:center; }
+.gif-modal-title { font-weight:700; font-size:1rem; color:var(--text); margin-bottom:6px; }
+.gif-modal-link { display:inline-flex; align-items:center; gap:6px; background:var(--yt-red); color:#fff; text-decoration:none; padding:7px 18px; border-radius:20px; font-size:0.82rem; font-weight:700; }
+.gif-modal-close { position:absolute; top:8px; left:8px; width:32px; height:32px; border-radius:50%; background:rgba(0,0,0,0.5); color:#fff; border:none; font-size:1.1rem; cursor:pointer; display:flex; align-items:center; justify-content:center; z-index:2; }
+
+/* STATS */
+.stats-panel { display:none; animation:fadeUp 0.35s ease; }
+.stats-panel.active { display:block; }
+.stats-card { background:var(--bg-card); border:1px solid var(--border); border-radius:var(--radius); padding:20px; margin-bottom:16px; box-shadow:var(--shadow); }
+.stats-card h3 { font-size:1rem; font-weight:800; color:var(--accent); margin-bottom:14px; text-align:center; }
+.stat-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(140px,1fr)); gap:10px; }
+.stat-box { background:var(--accent-bg); border:1px solid var(--accent-border); border-radius:10px; padding:12px; text-align:center; }
+.stat-box .stat-value { font-size:1.5rem; font-weight:900; color:var(--accent); }
+.stat-box .stat-label { font-size:0.78rem; color:var(--text-secondary); margin-top:2px; }
+.stat-muscle-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(160px,1fr)); gap:8px; }
+.stat-muscle-item { display:flex; align-items:center; padding:8px 12px; background:var(--bg-row-odd); border-radius:8px; gap:8px; }
+.stat-muscle-item .muscle-name { font-weight:600; font-size:0.85rem; white-space:nowrap; }
+.stat-muscle-item .bar-wrap { flex:1; height:6px; background:var(--border); border-radius:3px; overflow:hidden; }
+.stat-muscle-item .bar-fill { height:100%; background:var(--accent); border-radius:3px; transition:width 0.5s ease; }
+.stat-muscle-item .muscle-vol { font-weight:800; color:var(--accent); font-size:0.9rem; min-width:24px; text-align:center; }
+.reset-btn { display:block; margin:20px auto 0; background:var(--rpe-bg); border:1px solid var(--rpe-border); color:var(--rpe-color); padding:10px 24px; border-radius:30px; font-family:inherit; font-size:0.85rem; font-weight:700; cursor:pointer; transition:all 0.2s; }
+.reset-btn:hover { background:var(--rpe-color); color:#fff; }
+
+.volume-summary { background:var(--bg-card); border:1px solid var(--border); border-radius:var(--radius); padding:16px 18px; margin-top:24px; box-shadow:var(--shadow); }
+.volume-summary h3 { font-size:0.95rem; font-weight:800; color:var(--accent); margin-bottom:10px; text-align:center; }
+.volume-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(130px,1fr)); gap:8px; }
+.vol-item { display:flex; justify-content:space-between; padding:6px 10px; background:var(--bg-row-odd); border-radius:8px; font-size:0.82rem; }
+.vol-item .muscle-name { font-weight:600; }
+.vol-item .vol-count { font-weight:800; color:var(--accent); }
+
+.footer { text-align:center; padding:36px 20px; color:var(--text-dim); font-size:0.8rem; line-height:1.8; }
+
+@media(max-width:640px){
+  .main-header h1{font-size:1.7rem} .tab-btn{padding:8px 15px;font-size:0.82rem}
+  .exercise-top{padding:10px 12px;gap:10px} .exercise-gif-wrap{width:70px;height:70px}
+  .exercise-name-link{font-size:0.92rem}
+  .sets-table thead th{padding:7px 6px;font-size:0.72rem} .sets-table td{padding:6px 5px}
+  .sets-table input[type="number"]{width:46px;font-size:0.82rem}
+  .stat-grid{grid-template-columns:repeat(2,1fr)} .stat-muscle-grid{grid-template-columns:1fr}
+}
+</style>
+</head>
+<body>
+<div class="container">
+  <header class="main-header">
+    <h1>💪 جدول فل بدي — تضخيم</h1>
+    <p class="subtitle">5 أيام في الأسبوع — كل عضلة تتمرن 2-4 مرات أسبوعياً<br>اضغط الصورة لتكبير الحركة • اضغط اسم التمرين لفيديو يوتيوب</p>
+    <div class="badge-row">
+      <span class="info-badge">🔬 مبني على أبحاث علمية</span>
+      <span class="info-badge">💾 حفظ تلقائي للأوزان</span>
+      <span class="info-badge">⏱ 50-70 دقيقة / جلسة</span>
+    </div>
+  </header>
+  <div class="tip-banner">
+    <strong>لماذا فل بدي؟</strong> الدراسات أثبتت أن تمرين كل عضلة 3-5 مرات أسبوعياً يعطي نمو أكبر مقارنة بتقسيم العضلات.<br>
+    <strong>💾 الأوزان تنحفظ تلقائياً</strong> — حتى لو سكرت المتصفح أو الجوال.<br>
+    <strong>RPE</strong> = مقياس الجهد من 10 (RPE 8 = تقدر تسوي عدتين زيادة بس توقفت).
+  </div>
+  <div class="tabs-wrapper"><div class="tabs" id="tabs"></div></div>
+  <div id="day-panels"></div>
+  <div id="stats-panel" class="stats-panel"></div>
+  <div class="volume-summary">
+    <h3>📊 الحجم الأسبوعي المستهدف (مجموعات)</h3>
+    <div class="volume-grid">
+      <div class="vol-item"><span class="muscle-name">صدر</span><span class="vol-count">16</span></div>
+      <div class="vol-item"><span class="muscle-name">ظهر</span><span class="vol-count">18</span></div>
+      <div class="vol-item"><span class="muscle-name">أكتاف</span><span class="vol-count">16</span></div>
+      <div class="vol-item"><span class="muscle-name">كوادز</span><span class="vol-count">14</span></div>
+      <div class="vol-item"><span class="muscle-name">هامسترنق</span><span class="vol-count">12</span></div>
+      <div class="vol-item"><span class="muscle-name">بايسبس</span><span class="vol-count">12</span></div>
+      <div class="vol-item"><span class="muscle-name">ترايسبس</span><span class="vol-count">12</span></div>
+      <div class="vol-item"><span class="muscle-name">سمانة</span><span class="vol-count">8</span></div>
+    </div>
+  </div>
+  <footer class="footer">
+    جدول فل بدي للتضخيم — مبني على أبحاث Schoenfeld, Nippard & RP Strength<br>
+    الجدول: يوم 1، يوم 2، 🔴 راحة، يوم 3، يوم 4، يوم 5، 🔴 راحة
+  </footer>
+</div>
+
+<div class="gif-modal-overlay" id="gifModal">
+  <div class="gif-modal">
+    <button class="gif-modal-close" onclick="closeGif()">✕</button>
+    <img id="gifModalImg" src="" alt="">
+    <div class="gif-modal-footer">
+      <div class="gif-modal-title" id="gifModalTitle"></div>
+      <a class="gif-modal-link" id="gifModalYT" href="#" target="_blank" rel="noopener">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="white"><path d="M8 5v14l11-7z"/></svg>
+        شاهد على يوتيوب
+      </a>
+    </div>
+  </div>
+</div>
+<div class="save-toast" id="saveToast">💾 تم الحفظ تلقائياً</div>
+
+<script>
+const YT=id=>`https://www.youtube.com/watch?v=${id}`;
+const program=[
+  {day:"اليوم 1",title:"فل بدي A — تركيز قوة",focus:"Strength-Focused Full Body",muscles:["صدر","ظهر","كوادز","أكتاف","هامسترنق","ترايسبس"],exercises:[
+    {name:"Barbell Back Squat",nameAr:"سكوات خلفي بار",yt:YT("ultWZbUMPL8"),sets:4,reps:"4-6",rpe:"RPE 8",rest:"3 دقائق",target:"كوادز",gif:"https://fitnessprogramer.com/wp-content/uploads/2021/02/BARBELL-SQUAT.gif"},
+    {name:"Barbell Bench Press",nameAr:"بنش بريس بار",yt:YT("rT7DgCr-3pg"),sets:3,reps:"4-6",rpe:"RPE 8",rest:"3 دقائق",target:"صدر",gif:"https://fitnessprogramer.com/wp-content/uploads/2021/02/Barbell-Bench-Press.gif"},
+    {name:"Barbell Row",nameAr:"تجديف بار",yt:YT("FWJR5Ve8bnQ"),sets:3,reps:"6-8",rpe:"RPE 8",rest:"2-3 دقائق",target:"ظهر",gif:"https://fitnessprogramer.com/wp-content/uploads/2021/02/Barbell-Bent-Over-Row.gif"},
+    {name:"Overhead Press",nameAr:"شولدر بريس بار",yt:YT("2yjwXTZQDDI"),sets:3,reps:"6-8",rpe:"RPE 7",rest:"2-3 دقائق",target:"أكتاف",gif:"https://fitnessprogramer.com/wp-content/uploads/2021/02/Barbell-Overhead-Press.gif"},
+    {name:"Lying Leg Curl",nameAr:"ليق كيرل نائم",yt:YT("1Tq3QdYUuHs"),sets:3,reps:"8-10",rpe:"RPE 7",rest:"90 ثانية",target:"هامسترنق",gif:"https://fitnessprogramer.com/wp-content/uploads/2021/02/Lying-Leg-Curl.gif"},
+    {name:"Tricep Rope Pushdown",nameAr:"ترايسبس حبل كيبل",yt:YT("2-LAMcpzODU"),sets:3,reps:"10-12",rpe:"RPE 7",rest:"60 ثانية",target:"ترايسبس",gif:"https://fitnessprogramer.com/wp-content/uploads/2021/02/Pushdown.gif"},
+  ]},
+  {day:"اليوم 2",title:"فل بدي B — تركيز حجم",focus:"Volume-Focused Full Body",muscles:["هامسترنق","صدر","ظهر","كوادز","بايسبس","سمانة"],exercises:[
+    {name:"Romanian Deadlift",nameAr:"رفعة ميتة رومانية",yt:YT("7j-2w4-P14I"),sets:3,reps:"6-8",rpe:"RPE 8",rest:"2-3 دقائق",target:"هامسترنق",gif:"https://fitnessprogramer.com/wp-content/uploads/2021/02/Barbell-Romanian-Deadlift.gif"},
+    {name:"Incline Dumbbell Press",nameAr:"بنش مائل دمبل",yt:YT("8iPEnn-ltC8"),sets:3,reps:"8-10",rpe:"RPE 8",rest:"2 دقائق",target:"صدر",gif:"https://fitnessprogramer.com/wp-content/uploads/2021/02/Incline-Dumbbell-Press.gif"},
+    {name:"Lat Pulldown",nameAr:"سحب أمامي عالي",yt:YT("CAwf7n6Luuc"),sets:3,reps:"8-10",rpe:"RPE 8",rest:"2 دقائق",target:"ظهر",gif:"https://fitnessprogramer.com/wp-content/uploads/2021/02/Lat-Pulldown.gif"},
+    {name:"Leg Press",nameAr:"ليق بريس",yt:YT("IZxyjW7MPJQ"),sets:3,reps:"10-12",rpe:"RPE 7",rest:"2 دقائق",target:"كوادز",gif:"https://fitnessprogramer.com/wp-content/uploads/2021/02/LEG-PRESS.gif"},
+    {name:"EZ Bar Curl",nameAr:"باي بار زجزاج",yt:YT("kwG2ipFRgFo"),sets:3,reps:"8-10",rpe:"RPE 7",rest:"60 ثانية",target:"بايسبس",gif:"https://fitnessprogramer.com/wp-content/uploads/2021/02/EZ-Barbell-Curl.gif"},
+    {name:"Standing Calf Raise",nameAr:"سمانة واقف",yt:YT("4SNqFRrAVE4"),sets:4,reps:"10-15",rpe:"RPE 8",rest:"60 ثانية",target:"سمانة",gif:"https://fitnessprogramer.com/wp-content/uploads/2021/02/Standing-Calf-Raise.gif"},
+  ]},
+  {day:"اليوم 3",title:"فل بدي C — تركيز أرجل",focus:"Leg-Emphasis Full Body",muscles:["كوادز","هامسترنق","صدر","ظهر","أكتاف"],exercises:[
+    {name:"Front Squat",nameAr:"سكوات أمامي",yt:YT("m4ytaCJZpl0"),sets:4,reps:"6-8",rpe:"RPE 8",rest:"3 دقائق",target:"كوادز",gif:"https://fitnessprogramer.com/wp-content/uploads/2021/06/Barbell-Front-Squat.gif"},
+    {name:"Dumbbell Bench Press",nameAr:"بنش دمبل مسطح",yt:YT("VmB1G1K7v94"),sets:3,reps:"8-10",rpe:"RPE 7",rest:"2 دقائق",target:"صدر",gif:"https://fitnessprogramer.com/wp-content/uploads/2021/02/Dumbbell-Press.gif"},
+    {name:"Seated Cable Row",nameAr:"سحب أمامي جالس",yt:YT("GZbfZ033f74"),sets:3,reps:"10-12",rpe:"RPE 7",rest:"90 ثانية",target:"ظهر",gif:"https://fitnessprogramer.com/wp-content/uploads/2021/02/Seated-Cable-Row.gif"},
+    {name:"Leg Extension",nameAr:"ليق اكستنشن",yt:YT("YyvSfVjQeL0"),sets:3,reps:"10-12",rpe:"RPE 7",rest:"90 ثانية",target:"كوادز",gif:"https://fitnessprogramer.com/wp-content/uploads/2021/02/LEG-EXTENSION.gif"},
+    {name:"DB Stiff-Leg Deadlift",nameAr:"ديدلفت أرجل مستقيمة دمبل",yt:YT("jEy_czb3RKA"),sets:3,reps:"10-12",rpe:"RPE 7",rest:"90 ثانية",target:"هامسترنق",gif:"https://fitnessprogramer.com/wp-content/uploads/2021/02/Dumbbell-Stiff-Leg-Deadlift.gif"},
+    {name:"Dumbbell Lateral Raise",nameAr:"رفرفة جانبية",yt:YT("3VcKaXpzqRo"),sets:3,reps:"12-15",rpe:"RPE 7",rest:"60 ثانية",target:"أكتاف",gif:"https://fitnessprogramer.com/wp-content/uploads/2021/02/Dumbbell-Lateral-Raise.gif"},
+  ]},
+  {day:"اليوم 4",title:"فل بدي D — علوي مكثف",focus:"Upper-Emphasis Full Body",muscles:["ظهر","صدر","أكتاف","كوادز","بايسبس","ترايسبس"],exercises:[
+    {name:"Weighted Pull-Up",nameAr:"عقلة بوزن",yt:YT("eGo4IYlbE5g"),sets:3,reps:"6-8",rpe:"RPE 8",rest:"2-3 دقائق",target:"ظهر",gif:"https://fitnessprogramer.com/wp-content/uploads/2021/02/Pull-Up.gif"},
+    {name:"Incline Barbell Press",nameAr:"بنش مائل بار",yt:YT("SrqOu55lrYU"),sets:3,reps:"6-8",rpe:"RPE 8",rest:"2-3 دقائق",target:"صدر",gif:"https://fitnessprogramer.com/wp-content/uploads/2021/02/Incline-Barbell-Bench-Press.gif"},
+    {name:"Machine Shoulder Press",nameAr:"شولدر بريس جهاز",yt:YT("Wqq43dKW1TQ"),sets:3,reps:"8-10",rpe:"RPE 7",rest:"2 دقائق",target:"أكتاف",gif:"https://fitnessprogramer.com/wp-content/uploads/2021/02/Machine-Shoulder-Press.gif"},
+    {name:"Hack Squat",nameAr:"هاك سكوات",yt:YT("0tn5K9NlCfo"),sets:3,reps:"8-10",rpe:"RPE 7",rest:"2 دقائق",target:"كوادز",gif:"https://fitnessprogramer.com/wp-content/uploads/2021/02/Hack-Squat.gif"},
+    {name:"Incline Dumbbell Curl",nameAr:"باي مائل دمبل",yt:YT("soxrZlIl35U"),sets:3,reps:"10-12",rpe:"RPE 8",rest:"60 ثانية",target:"بايسبس",gif:"https://fitnessprogramer.com/wp-content/uploads/2021/02/Incline-Dumbbell-Curl.gif"},
+    {name:"Overhead Tricep Extension",nameAr:"تراي فوق الرأس كيبل",yt:YT("YbX7Wd8jQ-Q"),sets:3,reps:"10-12",rpe:"RPE 7",rest:"60 ثانية",target:"ترايسبس",gif:"https://fitnessprogramer.com/wp-content/uploads/2021/06/Cable-Overhead-Triceps-Extension.gif"},
+    {name:"Cable Face Pull",nameAr:"فيس بول كيبل",yt:YT("rep-qVOkqgk"),sets:3,reps:"12-15",rpe:"RPE 7",rest:"60 ثانية",target:"أكتاف",gif:"https://fitnessprogramer.com/wp-content/uploads/2021/02/Face-Pull.gif"},
+  ]},
+  {day:"اليوم 5",title:"فل بدي E — ضخ وإنهاء",focus:"Pump & Finish Full Body",muscles:["ظهر","صدر","كوادز","هامسترنق","أكتاف","بايسبس","ترايسبس","سمانة"],exercises:[
+    {name:"Sumo Deadlift",nameAr:"ديدلفت سومو",yt:YT("hCDzSR6bW10"),sets:3,reps:"4-6",rpe:"RPE 8",rest:"3 دقائق",target:"ظهر + هامسترنق",gif:"https://fitnessprogramer.com/wp-content/uploads/2021/02/Barbell-Sumo-Deadlift.gif"},
+    {name:"Cable Crossover",nameAr:"كروس أوفر كيبل",yt:YT("taI4XduLpTk"),sets:3,reps:"10-12",rpe:"RPE 7",rest:"90 ثانية",target:"صدر",gif:"https://fitnessprogramer.com/wp-content/uploads/2021/02/Cable-Crossover.gif"},
+    {name:"One-Arm Dumbbell Row",nameAr:"تجديف دمبل يد واحدة",yt:YT("roCP6wCXPqo"),sets:3,reps:"8-10",rpe:"RPE 8",rest:"90 ثانية",target:"ظهر",gif:"https://fitnessprogramer.com/wp-content/uploads/2021/02/One-Arm-Dumbbell-Row.gif"},
+    {name:"Bulgarian Split Squat",nameAr:"سبلت سكوات بلغاري",yt:YT("2C-uNgKwPLE"),sets:3,reps:"8-10",rpe:"RPE 8",rest:"90 ثانية",target:"كوادز",gif:"https://fitnessprogramer.com/wp-content/uploads/2021/02/Bulgarian-Split-Squat.gif"},
+    {name:"Cable Lateral Raise",nameAr:"رفرفة كيبل",yt:YT("PPrzBWZLS2Q"),sets:3,reps:"12-15",rpe:"RPE 7",rest:"60 ثانية",target:"أكتاف",gif:"https://fitnessprogramer.com/wp-content/uploads/2021/02/Cable-Lateral-Raise.gif"},
+    {name:"Hammer Curl",nameAr:"هامر كيرل",yt:YT("zC3nLlEvin4"),sets:3,reps:"10-12",rpe:"RPE 7",rest:"60 ثانية",target:"بايسبس",gif:"https://fitnessprogramer.com/wp-content/uploads/2021/02/Hammer-Curl.gif"},
+    {name:"Skull Crusher",nameAr:"سكل كرشر",yt:YT("d_KZxkY_0cM"),sets:3,reps:"10-12",rpe:"RPE 7",rest:"60 ثانية",target:"ترايسبس",gif:"https://fitnessprogramer.com/wp-content/uploads/2021/06/Skull-Crusher.gif"},
+    {name:"Seated Calf Raise",nameAr:"سمانة جالس",yt:YT("JbyjNymZOEo"),sets:4,reps:"12-15",rpe:"RPE 8",rest:"60 ثانية",target:"سمانة",gif:"https://fitnessprogramer.com/wp-content/uploads/2021/02/Seated-Calf-Raise.gif"},
+  ]}
+];
+
+const ytSvg=`<span class="yt-icon"><svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg></span>`;
+const STORAGE_KEY='fb5_workout';
+
+function loadData(){try{return JSON.parse(localStorage.getItem(STORAGE_KEY))||{}}catch{return{}}}
+function saveAllData(){
+  const d={};
+  document.querySelectorAll('input[data-key]').forEach(i=>{if(i.value)d[i.dataset.key]=i.value});
+  localStorage.setItem(STORAGE_KEY,JSON.stringify(d));
+  const t=document.getElementById('saveToast');t.classList.add('show');
+  clearTimeout(window._st);window._st=setTimeout(()=>t.classList.remove('show'),1500);
+}
+let _db;function debounceSave(){clearTimeout(_db);_db=setTimeout(saveAllData,600)}
+
+function openGif(g,t,y){
+  document.getElementById('gifModalImg').src=g;
+  document.getElementById('gifModalTitle').textContent=t;
+  document.getElementById('gifModalYT').href=y;
+  document.getElementById('gifModal').classList.add('show');
+}
+function closeGif(){document.getElementById('gifModal').classList.remove('show')}
+document.getElementById('gifModal').addEventListener('click',e=>{if(e.target===e.currentTarget)closeGif()});
+
+function calcStats(){
+  const data=loadData();let tw=0,ts=0,tr=0;const mv={};
+  program.forEach((day,di)=>{
+    day.exercises.forEach((ex,ei)=>{
+      for(let s=0;s<ex.sets;s++){
+        const w=parseFloat(data[`d${di}_e${ei}_s${s}_w`])||0;
+        const r=parseFloat(data[`d${di}_e${ei}_s${s}_r`])||0;
+        if(w>0&&r>0){tw+=w*r;ts++;tr+=r}
+      }
+      const targets=ex.target.includes('+')?ex.target.split(' + '):[ex.target];
+      targets.forEach(t=>{
+        let filled=0;
+        for(let s=0;s<ex.sets;s++){
+          const w=parseFloat(data[`d${di}_e${ei}_s${s}_w`])||0;
+          const r=parseFloat(data[`d${di}_e${ei}_s${s}_r`])||0;
+          if(w>0&&r>0)filled++;
+        }
+        if(filled>0)mv[t]=(mv[t]||0)+filled;
+      });
+    });
+  });
+  return{totalWeight:tw,totalSets:ts,totalReps:tr,muscleVolume:mv};
+}
+
+function renderStats(){
+  const{totalWeight,totalSets,totalReps,muscleVolume}=calcStats();
+  const p=document.getElementById('stats-panel');
+  const mx=Math.max(...Object.values(muscleVolume),1);
+  const mi=Object.entries(muscleVolume).sort((a,b)=>b[1]-a[1])
+    .map(([m,v])=>`<div class="stat-muscle-item"><span class="muscle-name">${m}</span><div class="bar-wrap"><div class="bar-fill" style="width:${(v/mx)*100}%"></div></div><span class="muscle-vol">${v}</span></div>`).join('');
+
+  p.innerHTML=`
+    <div class="stats-card"><h3>📈 إحصائيات الأسبوع</h3>
+      <div class="stat-grid">
+        <div class="stat-box"><div class="stat-value">${totalWeight.toLocaleString()}</div><div class="stat-label">كجم إجمالي مرفوع</div></div>
+        <div class="stat-box"><div class="stat-value">${totalSets}</div><div class="stat-label">مجموعة مكتملة</div></div>
+        <div class="stat-box"><div class="stat-value">${totalReps}</div><div class="stat-label">عدة إجمالية</div></div>
+        <div class="stat-box"><div class="stat-value">${totalSets?Math.round(totalWeight/totalSets):0}</div><div class="stat-label">متوسط وزن×عدة / مج</div></div>
+      </div>
+    </div>
+    <div class="stats-card"><h3>🏋️ الحجم المكتمل لكل عضلة</h3>
+      <div class="stat-muscle-grid">${mi||'<p style="text-align:center;color:var(--text-dim);grid-column:1/-1">سجّل أوزانك أولاً لرؤية الإحصائيات</p>'}</div>
+    </div>
+    <button class="reset-btn" onclick="if(confirm('متأكد تبي تمسح كل البيانات؟')){localStorage.removeItem('${STORAGE_KEY}');document.querySelectorAll('input[data-key]').forEach(i=>i.value='');renderStats()}">🗑 مسح جميع البيانات</button>`;
+}
+
+function switchTo(idx){
+  const btns=document.querySelectorAll('.tab-btn'),days=document.querySelectorAll('.day-content'),sp=document.getElementById('stats-panel');
+  if(idx==='stats'){btns.forEach(b=>b.classList.remove('active'));btns[btns.length-1].classList.add('active');days.forEach(d=>d.classList.remove('active'));sp.classList.add('active');renderStats()}
+  else{btns.forEach((b,i)=>b.classList.toggle('active',i===idx));days.forEach((d,i)=>d.classList.toggle('active',i===idx));sp.classList.remove('active')}
+}
+
+function init(){
+  const saved=loadData(),tabsEl=document.getElementById('tabs'),panels=document.getElementById('day-panels');
+  program.forEach((day,i)=>{
+    const btn=document.createElement('button');btn.className='tab-btn'+(i===0?' active':'');btn.textContent=day.day;btn.onclick=()=>switchTo(i);tabsEl.appendChild(btn);
+    const panel=document.createElement('div');panel.className='day-content'+(i===0?' active':'');
+    const mt=day.muscles.map(m=>`<span class="muscle-tag">${m}</span>`).join('');
+    let h=`<div class="day-title"><h2>${day.title}</h2><div class="focus">${day.focus}</div></div><div class="muscle-tags">${mt}</div>`;
+    day.exercises.forEach((ex,ei)=>{
+      let rows='';
+      for(let s=0;s<ex.sets;s++){
+        const wk=`d${i}_e${ei}_s${s}_w`,rk=`d${i}_e${ei}_s${s}_r`;
+        rows+=`<tr><td class="set-label">المجموعة ${s+1}</td><td><input type="number" min="0" placeholder="—" data-key="${wk}" value="${saved[wk]||''}" oninput="debounceSave()"></td><td><input type="number" min="0" placeholder="—" data-key="${rk}" value="${saved[rk]||''}" oninput="debounceSave()"></td></tr>`;
+      }
+      h+=`<div class="exercise-block"><div class="exercise-top">
+        <div class="exercise-gif-wrap" onclick="openGif('${ex.gif}','${ex.nameAr}','${ex.yt}')">
+          <img src="${ex.gif}" alt="${ex.name}" loading="lazy" onerror="this.parentElement.style.background='var(--accent-bg)';this.style.display='none'">
+          <div class="gif-overlay"><svg viewBox="0 0 24 24"><path d="M15 3H6c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V8l-5-5zM6 19V5h8v4h4v10H6z"/><circle cx="12" cy="13" r="3"/></svg></div>
+        </div>
+        <div class="exercise-info">
+          <a class="exercise-name-link" href="${ex.yt}" target="_blank" rel="noopener">${ytSvg}<span>${ex.nameAr}</span></a>
+          <div class="exercise-en">${ex.name} — ${ex.target}</div>
+          <div class="exercise-meta"><span class="meta-badge">${ex.sets} × ${ex.reps}</span><span class="meta-badge rpe">${ex.rpe}</span></div>
+        </div></div>
+        <table class="sets-table"><thead><tr><th>المجموعة</th><th>الوزن (كجم)</th><th>العدات</th></tr></thead><tbody>${rows}</tbody></table>
+        <div class="rest-note">⏱ راحة: ${ex.rest}</div></div>`;
+    });
+    panel.innerHTML=h;panels.appendChild(panel);
+  });
+  const sb=document.createElement('button');sb.className='tab-btn stats-tab';sb.textContent='📊 إحصائيات';sb.onclick=()=>switchTo('stats');tabsEl.appendChild(sb);
+  renderStats();
+}
+init();
+</script>
+</body>
+</html>
